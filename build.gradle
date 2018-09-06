@@ -14,4 +14,6 @@ repositories {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     compile 'com.vladsch.flexmark:flexmark-ext-spec-example:0.34.24'
+    compile "de.odysseus.juel:juel:2.1.3"
+
 }
