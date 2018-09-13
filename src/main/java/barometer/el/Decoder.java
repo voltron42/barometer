@@ -60,6 +60,27 @@ public class Decoder {
             temp.put(last, value);
             return this;
         }
+        
+        private void deepCopyTo(Map<Object, Object> from, Map<Object, Object> to) {
+            for (Map.Entry<Object,Object> entry : from.entrySet()) {
+                Object key = entry.getKey();
+                Object value = entry.getValue();
+                if (value instanceof Map) {
+                    Map<Object, Object> fromMap = (Map<Object, Object>) value;
+                    Map<Object, Object> toMap = new HashMap<>();
+                    deepCopyTo(fromMap, toMap);
+                    to.put(key,toMap);
+                } else {
+                    to.put(key,value);
+                }
+            }
+        }
+
+        public ContextBuilder copy() {
+            ContextBuilder out = new ContextBuilder();
+            deepCopyTo(this.context, out.context);
+            return out;
+        }
 
         private static Map<Object, Object> contextify(Date start) {
             Calendar calendar = Calendar.getInstance();

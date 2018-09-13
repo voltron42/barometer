@@ -3,18 +3,19 @@ package barometer.model.common;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElements;
+import java.util.List;
 
-public class Set implements Command {
-    private String variable;
-    private Value value;
+public class VarParam {
+    private String name;
+    private List<Value> defaultValue;
 
-    @XmlAttribute(name="variable")
-    public String getVariable() {
-        return variable;
+    @XmlAttribute(name="name")
+    public String getName() {
+        return name;
     }
 
-    public void setVariable(String variable) {
-        this.variable = variable;
+    public void setName(String name) {
+        this.name = name;
     }
 
     @XmlElements({
@@ -24,16 +25,11 @@ public class Set implements Command {
             @XmlElement(name="null",type=NullValue.class),
             @XmlElement(name="call-fn",type=CallFn.class),
     })
-    public Value getValue() {
-        return value;
+    public List<Value> getDefaultValue() {
+        return defaultValue;
     }
 
-    public void setValue(Value value) {
-        this.value = value;
-    }
-
-    @Override
-    public void accept(CommandVisitor visitor) {
-        visitor.visit(this);
+    public void setDefaultValue(List<Value> defaultValue) {
+        this.defaultValue = defaultValue;
     }
 }

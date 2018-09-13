@@ -1,21 +1,10 @@
 package barometer.model.common;
 
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElements;
 
-public class Set implements Command {
-    private String variable;
+public class Throw implements Command {
     private Value value;
-
-    @XmlAttribute(name="variable")
-    public String getVariable() {
-        return variable;
-    }
-
-    public void setVariable(String variable) {
-        this.variable = variable;
-    }
 
     @XmlElements({
             @XmlElement(name="primitive",type=PrimitiveValue.class),

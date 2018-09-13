@@ -4,17 +4,17 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElements;
 
-public class Set implements Command {
-    private String variable;
+public class MapEntry {
+    private String key;
     private Value value;
 
-    @XmlAttribute(name="variable")
-    public String getVariable() {
-        return variable;
+    @XmlAttribute(name="key")
+    public String getKey() {
+        return key;
     }
 
-    public void setVariable(String variable) {
-        this.variable = variable;
+    public void setKey(String key) {
+        this.key = key;
     }
 
     @XmlElements({
@@ -30,10 +30,5 @@ public class Set implements Command {
 
     public void setValue(Value value) {
         this.value = value;
-    }
-
-    @Override
-    public void accept(CommandVisitor visitor) {
-        visitor.visit(this);
     }
 }

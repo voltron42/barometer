@@ -1,0 +1,6 @@
+<!DOCTYPE program SYSTEM "program.dtd">
+<program name="hello_world">
+    <main>
+        <print value="Hello World!"/>
+    </main>
+</program>
