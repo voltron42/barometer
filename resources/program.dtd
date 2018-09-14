@@ -31,22 +31,22 @@
 <!ELEMENT else (set|print|prompt|for|for-each|while|do-while|if|try|call|break|continue|throw)+>
 <!ELEMENT break EMPTY>
 <!ELEMENT continue EMPTY>
-<!ELEMENT throw (list|map|null|primitive|call-fn)>
-<!ELEMENT set (list|map|null|primitive|call-fn)>
+<!ELEMENT throw (list|map|null|primitive|date|call-fn)>
+<!ELEMENT set (list|map|null|primitive|date|call-fn)>
 <!ATTLIST set variable CDATA #REQUIRED>
 <!ELEMENT prompt EMPTY>
 <!ATTLIST prompt
     variable CDATA #REQUIRED
     message CDATA #REQUIRED
     >
-<!ELEMENT list (list|map|null|primitive|call-fn)*>
+<!ELEMENT list (list|map|null|primitive|date|call-fn)*>
 <!ELEMENT map (entry*)>
-<!ELEMENT entry (list|map|null|primitive|call-fn)>
+<!ELEMENT entry (list|map|null|primitive|date|call-fn)>
 <!ATTLIST entry key CDATA #REQUIRED>
 <!ELEMENT null EMPTY>
 <!ELEMENT primitive EMPTY>
 <!ATTLIST primitive
-        type (string|number|boolean|file|path) #REQUIRED
+        type (string|number|boolean|path) #REQUIRED
         value CDATA #REQUIRED>
 <!ELEMENT date EMPTY>
 <!ATTLIST date
@@ -66,10 +66,10 @@
     name CDATA #REQUIRED
     template CDATA #REQUIRED
     >
-<!ELEMENT return (list|map|null|primitive|call-fn)>
-<!ELEMENT arg (list|map|null|primitive|call-fn)>
+<!ELEMENT return (list|map|null|primitive|date|call-fn)>
+<!ELEMENT arg (list|map|null|primitive|date|call-fn)>
 <!ATTLIST arg name CDATA #REQUIRED>
-<!ELEMENT param (list|map|null|primitive|call-fn)?>
+<!ELEMENT param (list|map|null|primitive|date|call-fn)?>
 <!ATTLIST param name CDATA #REQUIRED>
-<!ELEMENT var-param (list|map|null|primitive|call-fn)*>
+<!ELEMENT var-param (list|map|null|primitive|date|call-fn)*>
 <!ATTLIST var-param name CDATA #REQUIRED>

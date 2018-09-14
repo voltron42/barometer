@@ -22,6 +22,7 @@ public class Argument {
             @XmlElement(name="list",type=ListValue.class),
             @XmlElement(name="map",type=MapValue.class),
             @XmlElement(name="null",type=NullValue.class),
+            @XmlElement(name="date",type=DateValue.class),
             @XmlElement(name="call-fn",type=CallFn.class),
     })
     public Value getValue() {

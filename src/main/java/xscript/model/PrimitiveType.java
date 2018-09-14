@@ -1,5 +1,7 @@
 package xscript.model;
 
+import el.Instance;
+
 import java.io.File;
 import java.math.BigDecimal;
 import java.nio.file.Paths;
@@ -7,34 +9,36 @@ import java.nio.file.Paths;
 public enum PrimitiveType {
     STRING {
         @Override
-        public Object parse(String value) {
-            return value;
+        public Instance parse(String value) {
+            return Instance.create(value);
         }
     },
     NUMBER {
         @Override
-        public Object parse(String value) {
-            return new BigDecimal(value);
+        public Instance parse(String value) {
+            try {
+                return Instance.create(Double.parseDouble(value));
+            } catch (NumberFormatException n) {
+                try {
+                    return Instance.create(Double.parseDouble(value));
+                } catch (NumberFormatException n2) {
+                    throw new IllegalArgumentException(n2);
+                }
+            }
         }
     },
     BOOLEAN {
         @Override
-        public Object parse(String value) {
-            return Boolean.valueOf(value);
-        }
-    },
-    FILE {
-        @Override
-        public Object parse(String value) {
-            return new File(value);
+        public Instance parse(String value) {
+            return Instance.create(Boolean.valueOf(value));
         }
     },
     PATH {
         @Override
-        public Object parse(String value) {
-            return Paths.get(value);
+        public Instance parse(String value) {
+            return Instance.create(Paths.get(value));
         }
     };
 
-    public abstract Object parse(String value);
+    public abstract Instance parse(String value);
 }

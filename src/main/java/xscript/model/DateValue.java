@@ -2,18 +2,10 @@ package xscript.model;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
-public class PrimitiveValue implements Value {
-    private PrimitiveType type;
+public class DateValue implements Value {
+
     private String value;
-
-    @XmlAttribute(name="type")
-    public PrimitiveType getType() {
-        return type;
-    }
-
-    public void setType(PrimitiveType type) {
-        this.type = type;
-    }
+    private String format;
 
     @XmlAttribute(name="value")
     public String getValue() {
@@ -22,6 +14,15 @@ public class PrimitiveValue implements Value {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    @XmlAttribute(name="format")
+    public String getFormat() {
+        return format;
+    }
+
+    public void setFormat(String format) {
+        this.format = format;
     }
 
     @Override

@@ -12,7 +12,6 @@ public class ForEach extends Block implements Command {
         return itemName;
     }
 
-    @XmlAttribute(name="item")
     public void setItemName(String itemName) {
         this.itemName = itemName;
     }

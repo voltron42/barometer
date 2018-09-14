@@ -1,4 +1,4 @@
-<!DOCTYPE program SYSTEM "program.dtd">
+<!--<!DOCTYPE program SYSTEM "program.dtd">-->
 <program name="hello_world">
     <main>
         <prompt message="What is your name?" variable="name"/>

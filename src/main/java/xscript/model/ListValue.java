@@ -13,6 +13,7 @@ public class ListValue implements Value {
             @XmlElement(name="list",type=ListValue.class),
             @XmlElement(name="map",type=MapValue.class),
             @XmlElement(name="null",type=NullValue.class),
+            @XmlElement(name="date",type=DateValue.class),
             @XmlElement(name="call-fn",type=CallFn.class),
     })
     public List<Value> getItems() {
@@ -24,7 +25,7 @@ public class ListValue implements Value {
     }
 
     @Override
-    public Object accept(ValueVisitor visitor) {
+    public <T> T accept(ValueVisitor<T> visitor) {
         return visitor.visit(this);
     }
 }

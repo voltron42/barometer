@@ -4,7 +4,7 @@ public enum NullValue implements Value {
     INSTANCE;
 
     @Override
-    public Object accept(ValueVisitor visitor) {
+    public <T> T accept(ValueVisitor<T> visitor) {
         return visitor.visit(this);
     }
 }

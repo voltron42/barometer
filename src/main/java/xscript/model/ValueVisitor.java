@@ -1,13 +1,15 @@
 package xscript.model;
 
-public interface ValueVisitor {
-    Object visit(MapValue mapValue);
+public interface ValueVisitor<T> {
+    T visit(MapValue mapValue);
 
-    Object visit(PrimitiveValue primitiveValue);
+    T visit(PrimitiveValue primitiveValue);
 
-    Object visit(NullValue nullValue);
+    T visit(NullValue nullValue);
 
-    Object visit(ListValue listValue);
+    T visit(ListValue listValue);
 
-    Object visit(CallFn callFn);
+    T visit(CallFn callFn);
+
+    T visit(DateValue dateValue);
 }

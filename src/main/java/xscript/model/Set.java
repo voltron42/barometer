@@ -21,6 +21,7 @@ public class Set implements Command {
             @XmlElement(name="primitive",type=PrimitiveValue.class),
             @XmlElement(name="list",type=ListValue.class),
             @XmlElement(name="map",type=MapValue.class),
+            @XmlElement(name="date",type=DateValue.class),
             @XmlElement(name="null",type=NullValue.class),
             @XmlElement(name="call-fn",type=CallFn.class),
     })

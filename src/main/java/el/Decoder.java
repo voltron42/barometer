@@ -16,10 +16,10 @@ public class Decoder {
         factory = ExpressionFactoryImpl.newInstance();
     }
 
-    public String decode(String expression, ContextBuilder cb) {
+    public Instance decode(String expression, ContextBuilder cb) {
         ELContext ctx = new CTX(cb.context);
         ValueExpression ve = factory.createValueExpression(ctx, expression, Object.class);
-        return String.valueOf(ve.getValue(ctx));
+        return Instance.create(ve.getValue(ctx));
     }
 
     public static class ContextBuilder {

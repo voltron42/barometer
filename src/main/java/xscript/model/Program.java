@@ -1,10 +1,12 @@
 package xscript.model;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElements;
 import java.util.List;
 
 public class Program {
+    private String name;
     private List<Subroutine> subroutines;
     private Do mainRoutine;
 
@@ -27,5 +29,14 @@ public class Program {
 
     public void setMainRoutine(Do mainRoutine) {
         this.mainRoutine = mainRoutine;
+    }
+
+    @XmlAttribute(name="name")
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
