@@ -29,6 +29,29 @@ public class Decoder {
             context = new HashMap<>();
         }
 
+        public String toString() {
+            return context.entrySet().toString();
+        }
+
+        public ContextBuilder set(Instance inst, String label) {
+            return apply(context,label,inst);
+        }
+
+        private ContextBuilder apply(Map<Object, Object> node, String label, Instance inst) {
+            inst.put(node,label);
+            return this;
+        }
+
+        public ContextBuilder set(Instance inst, String label, String namespace) {
+            Object parent = get(namespace);
+            // todo
+            return this;
+        }
+
+        private Object get(String namespace) {
+            return null;
+        }
+
         public ContextBuilder set(String value, String... path) {
             return apply(value, path);
         }

@@ -1,7 +1,7 @@
 package xscript.exec;
 
-import el.Decoder;
-import el.Instance;
+import el2.Decoder;
+import el2.Instance;
 import xscript.model.*;
 import xscript.model.Set;
 
@@ -13,32 +13,22 @@ public class CommandExecutionVisitor implements CommandVisitor, ValueVisitor<Ins
 
     private static final Decoder decoder = new Decoder();
 
-    private Decoder.ContextBuilder ctx;
-
     private SubroutineRegistry registry;
 
     public CommandExecutionVisitor(SubroutineRegistry registry) {
         this.registry = registry;
     }
 
-    public Decoder.ContextBuilder getCtx() {
-        return ctx;
-    }
-
-    public void setCtx(Decoder.ContextBuilder ctx) {
-        this.ctx = ctx;
-    }
-
     @Override
     public void visit(Print print) {
-        System.out.println(decoder.decode(print.getValueExpression(),ctx));
+        System.out.println(decoder.decode(print.getValueExpression()));
     }
 
     @Override
     public void visit(Prompt prompt) {
-        System.out.println(decoder.decode(prompt.getMessageExpression(),ctx));
+        System.out.println(decoder.decode(prompt.getMessageExpression()));
         String inValue = input.nextLine();
-        ctx.set(inValue,prompt.getVariableName().split("\\."));
+        decoder.set(prompt.getVariableName(),new Instance.Text(inValue));
     }
 
     @Override
@@ -53,7 +43,7 @@ public class CommandExecutionVisitor implements CommandVisitor, ValueVisitor<Ins
                 setException.setVariable(catchBlock.getError());
                 setException.accept(this);
                 executeBlock(catchBlock);
-                dissoc(ctx,catchBlock.getError());
+                dissoc(decoder,catchBlock.getError());
             }
         } finally {
             executeBlock(aTry.getFinallyBlock());
@@ -129,7 +119,7 @@ public class CommandExecutionVisitor implements CommandVisitor, ValueVisitor<Ins
             }
             step.accept(this);
         }
-        dissoc(ctx,aFor.getVarName());
+        dissoc(decoder,aFor.getVarName());
     }
 
     @Override
@@ -147,6 +137,26 @@ public class CommandExecutionVisitor implements CommandVisitor, ValueVisitor<Ins
         throw ContinueException.INSTANCE;
     }
 
+    @Override
+    public void visit(Remove remove) {
+        // TODO
+    }
+
+    @Override
+    public void visit(Put put) {
+        // TODO
+    }
+
+    @Override
+    public void visit(Pop pop) {
+        // TODO
+    }
+
+    @Override
+    public void visit(Push push) {
+        // TODO
+    }
+
 
     @Override
     public Instance visit(MapValue mapValue) {
@@ -161,7 +171,7 @@ public class CommandExecutionVisitor implements CommandVisitor, ValueVisitor<Ins
 
     @Override
     public Instance visit(PrimitiveValue primitiveValue) {
-        return primitiveValue.getType().parse(String.valueOf(decoder.decode(primitiveValue.getValue(),ctx)));
+        return primitiveValue.getType().parse(String.valueOf(decoder.decode(primitiveValue.getValue())));
     }
 
     @Override
@@ -196,16 +206,17 @@ public class CommandExecutionVisitor implements CommandVisitor, ValueVisitor<Ins
     }
 
     private boolean test(String expression) {
-        return Boolean.valueOf(String.valueOf(decoder.decode(expression,ctx)));
+        return Boolean.valueOf(String.valueOf(decoder.decode(expression)));
     }
 
-    private void dissoc(Decoder.ContextBuilder ctx, String variable) {
+    private void dissoc(Decoder decoder, String variable) {
         // todo - remove variable from context
     }
 
     private CommandExecutionVisitor executeSubroutine(Subroutine subroutine, String subtype, String name, List<Argument> args) {
         CommandExecutionVisitor visitor = new CommandExecutionVisitor(registry);
-        visitor.setCtx(ctx.copy());
+        // todo - apply scope
+        //visitor.setCtx(ctx.copy());
         // todo - processing arg values;
         subroutine.getDoBlock().accept(visitor);
         return visitor;

@@ -1,4 +1,4 @@
-package el;
+package el2;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -13,8 +13,8 @@ public interface Instance {
     Date dateValue();
     Path filePathValue();
     List<Instance> listValue();
-    Map<String,Instance> mapValue();
-    void put(Map<Object,Object> map, String label);
+    Map<String, Instance> mapValue();
+    void put(Map<Object, Object> map, String label);
     void append(List<Object> list);
 
     static Instance create(Object obj) {
@@ -46,10 +46,10 @@ public interface Instance {
                 return new DecimalInstance(((Number) obj).doubleValue());
             }
         },
-        DATE(java.util.Date.class,java.sql.Date.class,java.sql.Timestamp.class) {
+        DATE(Date.class,java.sql.Date.class,java.sql.Timestamp.class) {
             @Override
             protected Instance from(Object obj) {
-                return new DateTimeInstance((java.util.Date) obj);
+                return new DateTimeInstance((Date) obj);
             }
         },
         FILE(File.class, Path.class) {
@@ -79,7 +79,7 @@ public interface Instance {
             @Override
             protected Instance from(Object obj) {
                 Map<?,?> in = (Map) obj;
-                Map<String,Instance> out = new HashMap<>();
+                Map<String, Instance> out = new HashMap<>();
                 for (Map.Entry entry : in.entrySet()) {
                     out.put(String.valueOf(entry.getKey()), fromObj(entry.getValue()));
                 }
@@ -167,7 +167,7 @@ public interface Instance {
 
         @Override
         public void append(List<Object> list) {
-
+            list.add(value);
         }
     }
 
@@ -619,7 +619,7 @@ public interface Instance {
 
         private Map<Object,Object> copy() {
             Map<Object,Object> out = new HashMap<>();
-            for(Map.Entry<String,Instance> entry : value.entrySet()) {
+            for(Map.Entry<String, Instance> entry : value.entrySet()) {
                 entry.getValue().put(out, entry.getKey());
             }
             return out;

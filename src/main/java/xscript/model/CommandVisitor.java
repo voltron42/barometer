@@ -28,4 +28,12 @@ public interface CommandVisitor {
     void visit(Break aBreak);
 
     void visit(Continue aContinue);
+
+    void visit(Remove remove);
+
+    void visit(Put put);
+
+    void visit(Pop pop);
+
+    void visit(Push push);
 }

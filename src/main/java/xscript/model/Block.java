@@ -9,6 +9,10 @@ public abstract class Block {
 
     @XmlElements({
             @XmlElement(name="set",type=Set.class),
+            @XmlElement(name="push",type=Push.class),
+            @XmlElement(name="pop",type=Pop.class),
+            @XmlElement(name="put",type=Put.class),
+            @XmlElement(name="remove",type=Remove.class),
             @XmlElement(name="print",type=Print.class),
             @XmlElement(name="prompt",type=Prompt.class),
             @XmlElement(name="for",type=For.class),

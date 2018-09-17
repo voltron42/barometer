@@ -2,6 +2,8 @@ package el;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.*;
@@ -49,5 +51,19 @@ public class DecoderTest {
         result = decoder.decode("${a.y}",ctx);
         assertTrue(result instanceof Number);
         assertEquals(2, result);
+    }
+
+    @Test
+    public void testDecodeList() {
+        List<Instance> list = new ArrayList<>();
+        list.add(new Instance.Text("Hello"));
+        list.add(new Instance.IntegerInstance(5L));
+        Decoder.ContextBuilder ctx = new Decoder.ContextBuilder();
+        ctx.set(new Instance.ListInstance(list),"list");
+        System.out.println(ctx);
+        Decoder decoder = new Decoder();
+        Instance value = decoder.decode("${list[0]}", ctx);
+        assertNotNull(value);
+        assertEquals(Instance.Type.TEXT, value.getType());
     }
 }

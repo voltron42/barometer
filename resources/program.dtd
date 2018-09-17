@@ -2,43 +2,58 @@
 <!ATTLIST program name CDATA #REQUIRED>
 <!ELEMENT print EMPTY>
 <!ATTLIST print value CDATA #REQUIRED>
-<!ELEMENT main (set|print|prompt|for|for-each|while|do-while|if|try|call|break|continue|throw)+>
-<!ELEMENT for (set|print|prompt|for|for-each|while|do-while|if|try|call|break|continue|throw)+>
+<!ELEMENT main (set|push|pop|put|remove|print|prompt|for|for-each|while|do-while|if|try|call|break|continue|throw)+>
+<!ELEMENT for (set|push|pop|put|remove|print|prompt|for|for-each|while|do-while|if|try|call|break|continue|throw)+>
 <!ATTLIST for
     var CDATA #REQUIRED
     init CDATA #REQUIRED
     while CDATA #REQUIRED
     step CDATA #REQUIRED>
-<!ELEMENT for-each (set|print|prompt|for|for-each|while|do-while|if|try|call|break|continue|throw)+>
+<!ELEMENT for-each (set|push|pop|put|remove|print|prompt|for|for-each|while|do-while|if|try|call|break|continue|throw)+>
 <!ATTLIST for-each
     item CDATA #REQUIRED
     index CDATA #IMPLIED
     collection CDATA #REQUIRED>
-<!ELEMENT while (set|print|prompt|for|for-each|while|do-while|if|try|call|break|continue|throw)+>
+<!ELEMENT while (set|push|pop|put|remove|print|prompt|for|for-each|while|do-while|if|try|call|break|continue|throw)+>
 <!ATTLIST while while CDATA #REQUIRED>
-<!ELEMENT do-while (set|print|prompt|for|for-each|while|do-while|if|try|call|break|continue|throw)+>
+<!ELEMENT do-while (set|push|pop|put|remove|print|prompt|for|for-each|while|do-while|if|try|call|break|continue|throw)+>
 <!ATTLIST do-while while CDATA #REQUIRED>
 <!ELEMENT try (do,(catch|finally|(catch,finally)))>
-<!ELEMENT do (set|print|prompt|for|for-each|while|do-while|if|try|call|break|continue|throw)+>
-<!ELEMENT catch (set|print|prompt|for|for-each|while|do-while|if|try|call|break|continue|throw)+>
+<!ELEMENT do (set|push|pop|put|remove|print|prompt|for|for-each|while|do-while|if|try|call|break|continue|throw)+>
+<!ELEMENT catch (set|push|pop|put|remove|print|prompt|for|for-each|while|do-while|if|try|call|break|continue|throw)+>
 <!ATTLIST catch error CDATA #REQUIRED>
-<!ELEMENT finally (set|print|prompt|for|for-each|while|do-while|if|try|call|break|continue|throw)+>
+<!ELEMENT finally (set|push|pop|put|remove|print|prompt|for|for-each|while|do-while|if|try|call|break|continue|throw)+>
 <!ELEMENT if (then,else-if*,else?)>
 <!ATTLIST if condition CDATA #REQUIRED>
-<!ELEMENT then (set|print|prompt|for|for-each|while|do-while|if|try|call|break|continue|throw)+>
-<!ELEMENT else-if (set|print|prompt|for|for-each|while|do-while|if|try|call|break|continue|throw)+>
+<!ELEMENT then (set|push|pop|put|remove|print|prompt|for|for-each|while|do-while|if|try|call|break|continue|throw)+>
+<!ELEMENT else-if (set|push|pop|put|remove|print|prompt|for|for-each|while|do-while|if|try|call|break|continue|throw)+>
 <!ATTLIST else-if condition CDATA #REQUIRED>
-<!ELEMENT else (set|print|prompt|for|for-each|while|do-while|if|try|call|break|continue|throw)+>
+<!ELEMENT else (set|push|pop|put|remove|print|prompt|for|for-each|while|do-while|if|try|call|break|continue|throw)+>
 <!ELEMENT break EMPTY>
 <!ELEMENT continue EMPTY>
 <!ELEMENT throw (list|map|null|primitive|date|call-fn)>
 <!ELEMENT set (list|map|null|primitive|date|call-fn)>
 <!ATTLIST set variable CDATA #REQUIRED>
+<!ELEMENT push (list|map|null|primitive|date|call-fn)>
+<!ATTLIST push
+        list CDATA #REQUIRED
+        index CDATA #IMPLIED>
+<!ELEMENT pop EMPTY>
+<!ATTLIST pop
+        list CDATA #REQUIRED
+        index CDATA #IMPLIED>
+<!ELEMENT put (list|map|null|primitive|date|call-fn)>
+<!ATTLIST put
+        map CDATA #REQUIRED
+        key CDATA #IMPLIED>
+<!ELEMENT remove EMPTY>
+<!ATTLIST remove
+        map CDATA #REQUIRED
+        key CDATA #IMPLIED>
 <!ELEMENT prompt EMPTY>
 <!ATTLIST prompt
     variable CDATA #REQUIRED
-    message CDATA #REQUIRED
-    >
+    message CDATA #REQUIRED>
 <!ELEMENT list (list|map|null|primitive|date|call-fn)*>
 <!ELEMENT map (entry*)>
 <!ELEMENT entry (list|map|null|primitive|date|call-fn)>
@@ -59,13 +74,11 @@
 <!ELEMENT procedure (param*,var-param?,do)>
 <!ATTLIST procedure
     name CDATA #REQUIRED
-    template CDATA #REQUIRED
-    >
+    template CDATA #REQUIRED>
 <!ELEMENT function (param*,var-param?,do,return)>
 <!ATTLIST function
     name CDATA #REQUIRED
-    template CDATA #REQUIRED
-    >
+    template CDATA #REQUIRED>
 <!ELEMENT return (list|map|null|primitive|date|call-fn)>
 <!ELEMENT arg (list|map|null|primitive|date|call-fn)>
 <!ATTLIST arg name CDATA #REQUIRED>

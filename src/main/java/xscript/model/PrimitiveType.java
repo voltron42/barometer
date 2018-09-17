@@ -1,6 +1,6 @@
 package xscript.model;
 
-import el.Instance;
+import el2.Instance;
 
 import java.io.File;
 import java.math.BigDecimal;
