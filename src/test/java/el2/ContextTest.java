@@ -7,7 +7,7 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-public class DecoderTest {
+public class ContextTest {
     @Test
     public void decode() throws Exception {
     }
@@ -25,9 +25,9 @@ public class DecoderTest {
         List<Instance> list = new ArrayList<>();
         list.add(new Instance.Text("Hello"));
         list.add(new Instance.IntegerInstance(5L));
-        Decoder decoder = new Decoder();
-        decoder.set("list", new Instance.ListInstance(list));
-        Instance value = decoder.decode("${list[0]}");
+        Context context = new Context();
+        context.set("list", new Instance.ListInstance(list));
+        Instance value = context.decode("${list[0]}");
         assertNotNull(value);
         assertEquals(Instance.Type.TEXT, value.getType());
         System.out.println(value.stringValue());

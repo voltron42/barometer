@@ -67,12 +67,8 @@ public interface Instance {
         LIST(List.class) {
             @Override
             protected Instance from(Object obj) {
-                List in = (List) obj;
-                List<Instance> out = new ArrayList<>();
-                for (Object item : in) {
-                    out.add(fromObj(item));
-                }
-                return new ListInstance(out);
+                List<Object> in = (List<Object>) obj;
+                return new ListInstance(in);
             }
         },
         MAP(Map.class) {
@@ -83,10 +79,15 @@ public interface Instance {
                 for (Map.Entry entry : in.entrySet()) {
                     out.put(String.valueOf(entry.getKey()), fromObj(entry.getValue()));
                 }
-                return new MapInstance(out);
+                return new MapInstance(in,out);
             }
         },
-        ;
+        NULL(Void.class, null) {
+            @Override
+            protected Instance from(Object obj) {
+                return new Null();
+            }
+        };
 
         private Set<Class<?>> classes;
 
@@ -490,10 +491,19 @@ public interface Instance {
     }
 
     class ListInstance implements Instance {
+        private List<Object> list;
         private List<Instance> value;
 
-        public ListInstance(List<Instance> value) {
-            this.value = value;
+        public ListInstance(List<Object> list) {
+            this.list = list;
+        }
+
+        public static ListInstance fromInstanceList(List<Instance> value) {
+            List<Object> list = new ArrayList<>();
+            for (Instance inst : value) {
+                inst.append(list);
+            }
+            return new ListInstance(list);
         }
 
         @Override
@@ -558,12 +568,24 @@ public interface Instance {
             }
             return out;
         }
+
+        public void add(Instance item) {
+            // TODO ;
+        }
+
+        public void set(long index, Instance item) {
+            // TODO ;
+        }
     }
 
     public static class MapInstance implements Instance {
+        private Map<Object, Object> myMap;
+        private Map<?, ?> in;
         private Map<String, Instance> value;
 
-        public MapInstance(Map<String, Instance> value) {
+        public MapInstance(Map<?, ?> in, Map<String, Instance> value) {
+            myMap = in;
+            this.in = in;
             this.value = value;
         }
 
@@ -628,6 +650,73 @@ public interface Instance {
         @Override
         public void append(List<Object> list) {
             list.add(copy());
+        }
+
+        public void removeFrom(String key) {
+
+        }
+        public void putInto(String key, Instance value) {
+
+        }
+
+
+
+    }
+
+    public class Null implements Instance {
+        @Override
+        public Type getType() {
+            return Type.NULL;
+        }
+
+        @Override
+        public boolean booleanValue() {
+            return false;
+        }
+
+        @Override
+        public long integerValue() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public double decimalValue() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String stringValue() {
+            return null;
+        }
+
+        @Override
+        public Date dateValue() {
+            return null;
+        }
+
+        @Override
+        public Path filePathValue() {
+            return null;
+        }
+
+        @Override
+        public List<Instance> listValue() {
+            return null;
+        }
+
+        @Override
+        public Map<String, Instance> mapValue() {
+            return null;
+        }
+
+        @Override
+        public void put(Map<Object, Object> map, String label) {
+            map.put(label,null);
+        }
+
+        @Override
+        public void append(List<Object> list) {
+            list.add(null);
         }
     }
 }

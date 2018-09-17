@@ -1,34 +1,42 @@
 package xscript.exec;
 
-import el2.Decoder;
+import common.time.DateTimeFormats;
+import el2.Context;
 import el2.Instance;
 import xscript.model.*;
 import xscript.model.Set;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class CommandExecutionVisitor implements CommandVisitor, ValueVisitor<Instance> {
 
     private static final Scanner input = new Scanner(System.in);
 
-    private static final Decoder decoder = new Decoder();
+    private final Context context;
 
-    private SubroutineRegistry registry;
+    private final SubroutineRegistry registry;
 
     public CommandExecutionVisitor(SubroutineRegistry registry) {
+        this(new Context(), registry);
+    }
+
+    private CommandExecutionVisitor(Context context, SubroutineRegistry registry) {
+        this.context = context;
         this.registry = registry;
     }
 
     @Override
     public void visit(Print print) {
-        System.out.println(decoder.decode(print.getValueExpression()));
+        System.out.println(context.decode(print.getValueExpression()));
     }
 
     @Override
     public void visit(Prompt prompt) {
-        System.out.println(decoder.decode(prompt.getMessageExpression()));
+        System.out.println(context.decode(prompt.getMessageExpression()));
         String inValue = input.nextLine();
-        decoder.set(prompt.getVariableName(),new Instance.Text(inValue));
+        context.set(prompt.getVariableName(), new Instance.Text(inValue));
     }
 
     @Override
@@ -38,28 +46,33 @@ public class CommandExecutionVisitor implements CommandVisitor, ValueVisitor<Ins
         } catch (ThrownException te) {
             Catch catchBlock = aTry.getCatchBlock();
             if (catchBlock != null) {
+                context.scope();
                 Set setException = new Set();
                 setException.setValue(te.getValue());
                 setException.setVariable(catchBlock.getError());
                 setException.accept(this);
                 executeBlock(catchBlock);
-                dissoc(decoder,catchBlock.getError());
+                context.descope();
             }
         } finally {
+            context.scope();
             executeBlock(aTry.getFinallyBlock());
+            context.descope();
         }
     }
 
     @Override
     public void visit(While aWhile) {
         while(test(aWhile.getWhileExpression())) {
+            context.scope();
             executeBlock(aWhile);
+            context.descope();
         }
     }
 
     @Override
     public void visit(Set set) {
-        // todo ;
+        context.set(set.getVariable(),set.getValue().accept(this));
     }
 
     @Override
@@ -85,13 +98,73 @@ public class CommandExecutionVisitor implements CommandVisitor, ValueVisitor<Ins
     @Override
     public void visit(DoWhile doWhile) {
         do {
+            context.scope();
             executeBlock(doWhile);
+            context.descope();
         } while (test(doWhile.getWhileExpression()));
+    }
+
+    private static class ForEachEntry {
+        private final Instance index;
+        private final Instance item;
+
+        private ForEachEntry(String index, Instance item) {
+            this.index = new Instance.Text(index);
+            this.item = item;
+        }
+
+        private ForEachEntry(int index, Instance item) {
+            this.index = new Instance.IntegerInstance((long) index);
+            this.item = item;
+        }
+
+        public Instance getIndex() {
+            return index;
+        }
+
+        public Instance getItem() {
+            return item;
+        }
     }
 
     @Override
     public void visit(ForEach forEach) {
-        // todo ;
+        String collectionExpression = forEach.getCollectionExpression();
+        String indexName = forEach.getIndexName();
+        String itemName = forEach.getItemName();
+        Instance collection = context.decode(collectionExpression);
+        List<ForEachEntry> entries = new ArrayList<>();
+        switch (collection.getType()) {
+            case LIST:
+                List<Instance> items = collection.listValue();
+                int size = items.size();
+                for (int x = 0; x < size; x++) {
+                    entries.add(new ForEachEntry(x,items.get(x)));
+                }
+                break;
+            case MAP:
+                for (Map.Entry<String, Instance> entry : collection.mapValue().entrySet()) {
+                    entries.add(new ForEachEntry(entry.getKey(), entry.getValue()));
+                }
+                break;
+            default:
+                throw new IllegalArgumentException("Expression does not resolve to a collection: " + collectionExpression);
+        }
+        for (ForEachEntry entry : entries) {
+            context.scope();
+            context.set(itemName, entry.getItem());
+            if (null != indexName) {
+                context.set(indexName, entry.getIndex());
+            }
+            try {
+                executeBlock(forEach);
+            } catch (BreakException e) {
+                break;
+            } catch (ContinueException e) {
+                // do nothing - just catch for control
+            }
+            context.descope();
+        }
     }
 
     private Set buildNumber(String name, String expression) {
@@ -105,11 +178,13 @@ public class CommandExecutionVisitor implements CommandVisitor, ValueVisitor<Ins
 
     @Override
     public void visit(For aFor) {
+        context.scope();
         Set init = buildNumber(aFor.getVarName(), aFor.getInitExpression());
         Set step = buildNumber(aFor.getVarName(), aFor.getStepExpression());
 
         init.accept(this);
         while(test(aFor.getWhileExpression())) {
+            context.scope();
             try {
                 executeBlock(aFor);
             } catch (BreakException e) {
@@ -118,8 +193,9 @@ public class CommandExecutionVisitor implements CommandVisitor, ValueVisitor<Ins
                 // do nothing - just catch for control
             }
             step.accept(this);
+            context.descope();
         }
-        dissoc(decoder,aFor.getVarName());
+        context.descope();
     }
 
     @Override
@@ -139,12 +215,36 @@ public class CommandExecutionVisitor implements CommandVisitor, ValueVisitor<Ins
 
     @Override
     public void visit(Remove remove) {
-        // TODO
+        String keyExpr = remove.getKey();
+        String mapExpr = remove.getMap();
+        Instance key = context.decode(keyExpr);
+        Instance mapInst = context.decode(mapExpr);
+        if (!Instance.Type.MAP.equals(mapInst.getType())) {
+            throw new IllegalArgumentException("remove key expression does not resolve to a string");
+        }
+        if (!Instance.Type.TEXT.equals(key.getType())) {
+            throw new IllegalArgumentException("remove map expression does not resolve to a map");
+        }
+        Instance.MapInstance map = (Instance.MapInstance) mapInst;
+        map.removeFrom(key.stringValue());
     }
 
     @Override
     public void visit(Put put) {
-        // TODO
+        String keyExpr = put.getKey();
+        Value valueExpr = put.getValue();
+        String mapExpr = put.getMap();
+        Instance key = context.decode(keyExpr);
+        Instance mapInst = context.decode(mapExpr);
+        Instance value = valueExpr.accept(this);
+        if (!Instance.Type.MAP.equals(mapInst.getType())) {
+            throw new IllegalArgumentException("put key expression does not resolve to a string");
+        }
+        if (!Instance.Type.TEXT.equals(key.getType())) {
+            throw new IllegalArgumentException("put map expression does not resolve to a map");
+        }
+        Instance.MapInstance map = (Instance.MapInstance) mapInst;
+        map.putInto(key.stringValue(),value);
     }
 
     @Override
@@ -154,29 +254,47 @@ public class CommandExecutionVisitor implements CommandVisitor, ValueVisitor<Ins
 
     @Override
     public void visit(Push push) {
-        // TODO
+        String indexExpr = push.getIndex();
+        String listExpr = push.getList();
+        Value value = push.getValue();
+        Instance listInst = context.decode(listExpr);
+        Instance item = value.accept(this);
+        if (!Instance.Type.LIST.equals(listInst.getType())) {
+            throw new IllegalArgumentException("push list expression does not resolve to a list");
+        }
+        Instance.ListInstance list = (Instance.ListInstance) listInst;
+        if (null == indexExpr) {
+            list.add(item);
+        } else {
+            Instance indexInst = context.decode(indexExpr);
+            if (!Instance.Type.LONG.equals(indexInst.getType())) {
+                throw new IllegalArgumentException("push index expression does not resolve to a integer");
+            }
+            list.set(indexInst.integerValue(),item);
+        }
     }
 
 
     @Override
     public Instance visit(MapValue mapValue) {
         Map<String,Instance> out = new HashMap<>();
+
         for(MapEntry entry : mapValue.getEntries()) {
             if (out.containsKey(entry.getKey()))
                 throw new EvaluationException("repeated key: " + entry.getKey());
             out.put(entry.getKey(),entry.getValue().accept(this));
         }
-        return new Instance.MapInstance(out);
+        return new Instance.MapInstance(in, out);
     }
 
     @Override
     public Instance visit(PrimitiveValue primitiveValue) {
-        return primitiveValue.getType().parse(String.valueOf(decoder.decode(primitiveValue.getValue())));
+        return primitiveValue.getType().parse(String.valueOf(context.decode(primitiveValue.getValue())));
     }
 
     @Override
     public Instance visit(NullValue nullValue) {
-        return null;
+        return new Instance.Null();
     }
 
     @Override
@@ -201,23 +319,63 @@ public class CommandExecutionVisitor implements CommandVisitor, ValueVisitor<Ins
 
     @Override
     public Instance visit(DateValue dateValue) {
-        // todo
-        return null;
+        String format = dateValue.getFormat();
+        String value = dateValue.getValue();
+        Date date = null;
+        try {
+            if (null == format) {
+                date = DateTimeFormats.DATE_TIME_ROBUST.parse(value);
+            } else {
+                SimpleDateFormat formatter = new SimpleDateFormat(format);
+                date = formatter.parse(value);
+            }
+            return new Instance.DateTimeInstance(date);
+        } catch (ParseException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     private boolean test(String expression) {
-        return Boolean.valueOf(String.valueOf(decoder.decode(expression)));
-    }
-
-    private void dissoc(Decoder decoder, String variable) {
-        // todo - remove variable from context
+        return Boolean.valueOf(String.valueOf(context.decode(expression)));
     }
 
     private CommandExecutionVisitor executeSubroutine(Subroutine subroutine, String subtype, String name, List<Argument> args) {
-        CommandExecutionVisitor visitor = new CommandExecutionVisitor(registry);
-        // todo - apply scope
-        //visitor.setCtx(ctx.copy());
-        // todo - processing arg values;
+        CommandExecutionVisitor visitor = new CommandExecutionVisitor(context.rescope(), registry);
+        Map<String,Value> argMap = new HashMap<>();
+        ListValue varArgs = new ListValue();
+        varArgs.setItems(new ArrayList<>());
+        String varArgName = null;
+        if (subroutine.getVarParam() != null) {
+            varArgName = subroutine.getVarParam().getName();
+        }
+        for (Argument arg : args) {
+            if (arg.getName().equals(varArgName)) {
+                varArgs.getItems().add(arg.getValue());
+            } else {
+                argMap.put(arg.getName(), arg.getValue());
+            }
+        }
+        Do init = new Do();
+        for (Param param : subroutine.getParams()) {
+            String paramName = param.getName();
+            Value value = param.getDefaultValue();
+            Set setter = new Set();
+            init.getCommands().add(setter);
+            setter.setVariable(paramName);
+            if (argMap.containsKey(paramName)) {
+                value = argMap.get(paramName);
+            }
+            if (value == null) {
+                setter.setValue(NullValue.INSTANCE);
+            } else {
+                setter.setValue(value);
+            }
+        }
+        Set setter = new Set();
+        setter.setVariable(varArgName);
+        setter.setValue(varArgs);
+        init.getCommands().add(setter);
+        init.accept(visitor);
         subroutine.getDoBlock().accept(visitor);
         return visitor;
     }
